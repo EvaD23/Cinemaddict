@@ -8,4 +8,4 @@ const Method = {
   DELETE: 'DELETE',
 };
 
-export { END_POINT, Method }
+export { END_POINT, Method };
