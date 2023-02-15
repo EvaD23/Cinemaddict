@@ -8,4 +8,8 @@ const Method = {
   DELETE: 'DELETE',
 };
 
-export { END_POINT, Method };
+const EventType = {
+  INIT: 'INIT',
+};
+
+export { END_POINT, Method, EventType };

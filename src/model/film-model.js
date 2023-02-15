@@ -1,4 +1,5 @@
 import Observable from '../framework/observable.js';
+import { EventType} from '../const.js';
 
 
 export default class FilmModel extends Observable {
@@ -8,15 +9,13 @@ export default class FilmModel extends Observable {
   constructor(api) {
     super();
     this.#api = api;
-
-
   }
 
   // получаем данные от сервера
   async init() {
     const serverMovies = await this.#api.getMovies();
     this.#movies = serverMovies.map((movie) => this.#parseServerToClient(movie));
-    //TODO: добавить notify
+    this._notify(EventType.INIT);
   }
 
   // Возвращаем все фильмы из модели, чтобы с ними работать
