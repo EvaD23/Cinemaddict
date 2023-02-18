@@ -1,27 +1,50 @@
 import Observable from '../framework/observable.js';
+import { EventType } from '../const.js';
 
 
 export default class FilmModel extends Observable {
   #api = null;
-  #movies = [];
+  #movies = new Map();
 
   constructor(api) {
     super();
     this.#api = api;
-
-
   }
 
   // получаем данные от сервера
   async init() {
     const serverMovies = await this.#api.getMovies();
-    this.#movies = serverMovies.map((movie) => this.#parseServerToClient(movie));
-    //TODO: добавить notify
+    serverMovies.forEach((movie) => {
+      const clientMovie = this.#parseServerToClient(movie);
+      // при записи в мапу нужно указывать ключ и значение
+      this.#movies.set(clientMovie.id, clientMovie);
+    });
+    this._notify(EventType.INIT);
   }
 
   // Возвращаем все фильмы из модели, чтобы с ними работать
   get movies() {
-    return this.#movies;
+    // values - возвращает из мапы значения в виде массива
+    const movies = [];
+    this.#movies.forEach((movie) => {
+      movies.push(movie);
+    });
+    return movies;
+  }
+
+  //Добавляет обновление данных в модели делает отправку на сервер
+  async updateMovie(movie, eventType) {
+    try {
+      const serverMovie = await this.#api.updateMovie(this.#parseClientToServer(movie));
+      const newMovie = this.#parseServerToClient(serverMovie);
+      this.#movies.set(newMovie.id, newMovie);
+      this._notify(eventType, newMovie);
+
+
+    }
+    catch (err) {
+      console.log(err); //TODO: добавить обработку ошибок
+    }
   }
 
   #parseClientToServer(movie) {
