@@ -1,15 +1,25 @@
 import Api from './api.js';
+import { FilterType } from './const.js';
 import FilmModel from './model/film-model.js';
+import FilterModel from './model/filter-model.js';
 import BoardPresenter from './presenter/board-presenter.js';
+import FilterPresenter from './presenter/filter-presenter.js';
 
 
 const api = new Api();
 
 const mainContainer = document.querySelector('.main');
 
+
 const filmModel = new FilmModel(api);
 filmModel.init();
 
-const boardPresenter = new BoardPresenter({ mainContainer, filmModel });
+const filterModel = new FilterModel();
+
+const filterPresenter = new FilterPresenter({ filterContainer: mainContainer, movieModel: filmModel, filterModel });
+filterPresenter.init(FilterType.ALL);
+
+const boardPresenter = new BoardPresenter({ mainContainer, filmModel, filterModel });
 boardPresenter.init();
+
 

@@ -1,4 +1,4 @@
-import { render, remove } from '../framework/render.js';
+import { render, remove, replace } from '../framework/render.js';
 import FilmView from '../view/film-view.js';
 
 export default class FilmPresenter {
@@ -13,14 +13,21 @@ export default class FilmPresenter {
   }
 
   init(movie) {
+    const prevMovieComponent = this.#filmComponent;
     this.#filmComponent = new FilmView({ movie, handleClickButton: this.#handleClickButton });
-
-    render(this.#filmComponent, this.#filmContainer);
+    // для перерисовки карточки фильма
+    if (!prevMovieComponent) {
+      render(this.#filmComponent, this.#filmContainer);
+      return;
+    }
+    replace(this.#filmComponent, prevMovieComponent);
+    remove(prevMovieComponent);
   }
 
   //удаляем один фильм
   clearMovie() {
     remove(this.#filmComponent);
   }
+
 
 }
