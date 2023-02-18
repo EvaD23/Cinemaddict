@@ -1,5 +1,5 @@
 
-const END_POINT = 'https://19.ecmascript.pages.academy/cinemaddict/';
+const END_POINT = 'https://19.ecmascript.pages.academy/cinemaddict';
 
 const Method = {
   GET: 'GET',
@@ -10,6 +10,11 @@ const Method = {
 
 const EventType = {
   INIT: 'INIT',
+  MINOR: 'MINOR',
 };
 
-export { END_POINT, Method, EventType };
+const ActionType = {
+  UPDATE_MOVIE: 'UPDATE_MOVIE',
+};
+
+export { END_POINT, Method, EventType, ActionType };

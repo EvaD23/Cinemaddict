@@ -16,7 +16,7 @@ export default class Api extends ApiService {
 
   updateMovie(movie) {
     return this._load({
-      url: `movie/${movie.id}`,
+      url: `movies/${movie.id}`,
       method: Method.PUT,
       body: JSON.stringify(movie),
       headers: new Headers({ 'Content-Type': 'application/json' }),

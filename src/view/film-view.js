@@ -1,3 +1,4 @@
+import { ActionType, EventType } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 /*
 {
@@ -56,8 +57,25 @@ import AbstractView from '../framework/view/abstract-view.js';
 }
 */
 
-// TODO: добавить работу с кнопками
+// функция добавляет форматирование для продолжительности фильма
+function createDurationTemplate(minutes) {
+  if (minutes < 60) {
+    return `${minutes}M`;
+  } else {
+    const hours = Math.floor(minutes / 60);
 
+    return `${hours}H ${minutes % 60}M`;
+  }
+}
+
+function createDescriptionTempate(description) {
+  if (description.length >= 140) {
+    return `${description.slice(0, 138)}…`;
+  }
+  return description;
+}
+
+// TODO: добавить работу с кнопками
 function createFilmTempate(movie) {
   return `   
 <article class="film-card">
@@ -66,30 +84,54 @@ function createFilmTempate(movie) {
     <p class="film-card__rating">${movie.info.totalRating}</p>
     <p class="film-card__info">
       <span class="film-card__year">${movie.info.release.date.getFullYear()}</span>
-<span class="film-card__duration">${movie.info.duration /* TODO: добавить форматировние*/}</span>
-      <span class="film-card__genre">${movie.info.genre /* TODO: добавить форматировние*/}</span>
+<span class="film-card__duration">${createDurationTemplate(movie.info.duration)}</span>
+      <span class="film-card__genre">${movie.info.genre[0]}</span>
     </p>
     <img src="${movie.info.poster}" alt="" class="film-card__poster">
-    <p class="film-card__description">${movie.info.description /* TODO: добавить форматировние*/}</p>
+    <p class="film-card__description">${createDescriptionTempate(movie.info.description)}</p>
     <span class="film-card__comments">${movie.comments.length} comments</span>
   </a>
   <div class="film-card__controls">
-    <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-    <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-    <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+    <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${movie.userDetails.watchlist ? 'film-card__controls-item--active' : ''}" type="button" data-button="watchlist">Add to watchlist</button>
+    <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${movie.userDetails.alreadyWatched ? 'film-card__controls-item--active' : ''}" type="button" data-button="alreadyWatched">Mark as watched</button>
+    <button class="film-card__controls-item film-card__controls-item--favorite ${movie.userDetails.favorite ? 'film-card__controls-item--active' : ''}" type="button"  data-button="favorite">Mark as favorite</button>
   </div>
 </article>`;
 }
 
 export default class FilmView extends AbstractView {
   #movie = null;
+  #handleClickButton = null;
 
-  constructor({ movie }) {
+  constructor({ movie, handleClickButton }) {
     super();
     this.#movie = movie;
+    this.#handleClickButton = handleClickButton;
+    this.element.querySelectorAll('.film-card__controls-item').forEach((element) => {
+      element.addEventListener('click', this.#handlerClickButton);
+    });
   }
 
   get template() {
     return createFilmTempate(this.#movie);
   }
+
+  #handlerClickButton = (evt) => {
+    const newMovie = { ...this.#movie };
+    switch (evt.target.dataset.button) {
+      case 'watchlist':
+        newMovie.userDetails.watchlist = !newMovie.userDetails.watchlist;
+        break;
+      case 'alreadyWatched':
+        newMovie.userDetails.alreadyWatched = !newMovie.userDetails.alreadyWatched;
+        break;
+      case 'favorite':
+        newMovie.userDetails.favorite = !newMovie.userDetails.favorite;
+        break;
+    }
+    // вызов функции обработчика действия вьюхи
+    this.#handleClickButton(ActionType.UPDATE_MOVIE, EventType.MINOR, newMovie);
+  };
+
+
 }
