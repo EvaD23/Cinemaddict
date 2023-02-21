@@ -10,13 +10,14 @@ const api = new Api();
 
 const mainContainer = document.querySelector('.main');
 
+const headerContainer = document.querySelector('.header');
 
 const filmModel = new FilmModel(api);
 filmModel.init();
 
 const filterModel = new FilterModel();
 
-const filterPresenter = new FilterPresenter({ filterContainer: mainContainer, movieModel: filmModel, filterModel });
+const filterPresenter = new FilterPresenter({ filterContainer: mainContainer, movieModel: filmModel, filterModel, headerContainer });
 filterPresenter.init(FilterType.ALL);
 
 const boardPresenter = new BoardPresenter({ mainContainer, filmModel, filterModel });

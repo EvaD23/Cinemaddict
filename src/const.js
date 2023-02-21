@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 
 const END_POINT = 'https://19.ecmascript.pages.academy/cinemaddict';
 
@@ -8,9 +9,16 @@ const Method = {
   DELETE: 'DELETE',
 };
 
+const SortType = {
+  DEFAULT: 'DEFAULT',
+  DATE: 'DATE',
+  RATING: 'RATING',
+};
+
 const EventType = {
   INIT: 'INIT',
   MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
   PATCH: 'PATCH',
 };
 
@@ -46,4 +54,9 @@ const filter = {
   [FilterType.FAVORITE]: (movies) => movies.filter((movie) => movie.userDetails.favorite),
 };
 
-export { END_POINT, Method, EventType, ActionType, FilterType, filter };
+const sorter = {
+  [SortType.DATE]: (movieA, movieB) => dayjs(movieA.info.release.date).diff(movieB.info.release.date),
+  [SortType.RATING]: (movieA, movieB) => movieB.info.totalRating - movieA.info.totalRating,
+};
+
+export { END_POINT, Method, EventType, ActionType, FilterType, filter, sorter, SortType };

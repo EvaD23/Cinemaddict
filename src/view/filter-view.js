@@ -14,13 +14,13 @@ function createFilterTemplate(countMovies, currentFilter) {
 
 
 export default class FilterView extends AbstractView {
-  #movies = null;
+  #countMovies = null;
   #handleClickFilter = null;
   #currentFilter = null;
 
-  constructor({ movies, handleClickFilter, currentFilter }) {
+  constructor({ countMovies, handleClickFilter, currentFilter }) {
     super();
-    this.#movies = movies;
+    this.#countMovies = countMovies;
     this.#handleClickFilter = handleClickFilter;
     this.#currentFilter = currentFilter;
     this.element.querySelectorAll('.main-navigation__item').forEach((element) => {
@@ -30,29 +30,7 @@ export default class FilterView extends AbstractView {
   }
 
   get template() {
-    return createFilterTemplate(this.#countMovies(), this.#currentFilter);
-  }
-
-  // функция счетчик фильмов в разных фильтрах
-  #countMovies() {
-    const moviesCount = {
-      watchList: 0,
-      alreadyWatched: 0,
-      favorite: 0,
-    };
-    this.#movies.forEach((movie) => {
-      if (movie.userDetails.watchlist) {
-        moviesCount.watchList++;
-      }
-      if (movie.userDetails.alreadyWatched) {
-        moviesCount.alreadyWatched++;
-      }
-      if (movie.userDetails.favorite) {
-        moviesCount.favorite++;
-      }
-
-    });
-    return moviesCount;
+    return createFilterTemplate(this.#countMovies, this.#currentFilter);
   }
 
   #handlerClickFilter = (evt) => {
@@ -60,7 +38,7 @@ export default class FilterView extends AbstractView {
     const filterType = evt.target.dataset.filter;
     // вызываем функцию которая изменяет данные в модели
     if (this.#currentFilter !== filterType) {
-      this.#handleClickFilter(filterType, EventType.MINOR);
+      this.#handleClickFilter(filterType, EventType.MAJOR);
     }
   };
 
