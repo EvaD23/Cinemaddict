@@ -15,7 +15,7 @@ export default class FilmPresenter {
   init(movie) {
     const prevMovieComponent = this.#filmComponent;
     this.#filmComponent = new FilmView({ movie, handleClickButton: this.#handleClickButton });
-    // для перерисовки карточки фильма
+    // для перерисовки карточки фильма с прошлой на новую или инциализация, если рендерится впервые
     if (!prevMovieComponent) {
       render(this.#filmComponent, this.#filmContainer);
       return;
@@ -24,10 +24,8 @@ export default class FilmPresenter {
     remove(prevMovieComponent);
   }
 
-  //удаляем один фильм
+  // мотод для удаления одного фильма
   clearMovie() {
     remove(this.#filmComponent);
   }
-
-
 }

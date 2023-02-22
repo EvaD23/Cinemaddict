@@ -1,4 +1,3 @@
-
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createEmptyListTemplate() {
@@ -6,7 +5,6 @@ function createEmptyListTemplate() {
 }
 
 export default class EmptyListView extends AbstractView {
-
 
   get template() {
     return createEmptyListTemplate();

@@ -116,6 +116,7 @@ export default class FilmView extends AbstractView {
     return createFilmTempate(this.#movie);
   }
 
+  // метод обработчик для панели добавить/убрать из фильтров
   #handlerClickButton = (evt) => {
     const newMovie = { ...this.#movie };
     switch (evt.target.dataset.button) {

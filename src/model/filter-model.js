@@ -7,10 +7,11 @@ export default class FilterModel extends Observable {
   get filterType() {
     return this.#filterType;
   }
-  // смена фильтра - фильтр принимаем снаружи в том месте где вызываем метод
 
+  // смена фильтра - фильтр и тип события принимаем снаружи в том месте где вызываем метод
   changeFilterType(filterType, eventType) {
     this.#filterType = filterType;
+    // уведомляем слушателей о изменениях
     this._notify(eventType, filterType);
   }
 }

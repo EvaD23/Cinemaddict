@@ -19,11 +19,13 @@ export default class FilterPresenter {
     this.#filterModel.addObserver(this.#handlerModelEvent);
   }
 
+  // инициализируем header
   init(currentFilter) {
     this.#clearHeader();
     this.#renderHeader(currentFilter);
   }
 
+  // рендерим header
   #renderHeader(currentFilter) {
     const movies = this.#movieModel.movies;
     const countMovies = this.#countMovies(movies);
@@ -36,6 +38,7 @@ export default class FilterPresenter {
     }
   }
 
+  // метод очистки
   #clearHeader() {
     if (this.#filterComponent) {
       remove(this.#filterComponent);
@@ -45,17 +48,17 @@ export default class FilterPresenter {
     }
   }
 
-  // функция которая реагирует на изменение модели
+  // метод который реагирует на изменение модели
   #handlerModelEvent = () => {
     this.init(this.#filterModel.filterType);
   };
 
-  // фукнция которая меняет тип фильтра опосредованно вызывает метод у filterModel
+  // метод который меняет тип фильтра опосредованно вызывает метод у filterModel
   #changeFilterType = (filterType, eventType) => {
     this.#filterModel.changeFilterType(filterType, eventType);
   };
 
-  // функция счетчик фильмов в разных фильтрах
+  // метод счетчик фильмов для разных фильтров
   #countMovies(movies) {
     const moviesCount = {
       watchList: 0,

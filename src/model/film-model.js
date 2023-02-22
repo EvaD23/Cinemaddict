@@ -47,6 +47,7 @@ export default class FilmModel extends Observable {
     }
   }
 
+  // Метод преобразует ключи в объекте для передачи с клиента на сервер
   #parseClientToServer(movie) {
     const release = {
       ...movie.info.release,
@@ -85,6 +86,7 @@ export default class FilmModel extends Observable {
     return adaptedMovie;
   }
 
+  // Метод преобразует ключи в объекте от сервер для клиента
   #parseServerToClient(movie) {
     const release = {
       ...movie.film_info.release,

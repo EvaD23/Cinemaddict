@@ -5,6 +5,7 @@ import FilmPresenter from './film-presenter.js';
 import SortView from '../view/sort-view.js';
 import EmptyListView from '../view/empty-list-view.js';
 import ButtonView from '../view/button-view.js';
+import FilmAmount from '../view/film-amount-view.js';
 
 
 export default class BoardPresenter {
@@ -18,11 +19,14 @@ export default class BoardPresenter {
   #buttonComponent = null;
   #counterMovies = 5;
   #isShowButton = true;
-  // Сохранять презентеры, чтобы получать к ним доступы
+  #filmAmountComponent = null;
+  #footerContainer = null;
+  // Сохранять презентеры в мапу, чтобы получать к ним быстрй доступы
   #filmPresenters = new Map();
 
-  constructor({ mainContainer, filmModel, filterModel }) {
+  constructor({ mainContainer, filmModel, filterModel, footerContainer }) {
     this.#mainContainer = mainContainer;
+    this.#footerContainer = footerContainer;
     this.#filmModel = filmModel;
     this.#filterModel = filterModel;
 
@@ -43,8 +47,10 @@ export default class BoardPresenter {
     // для передачи фильмов в функцию находящуюся в константе filter
     const filterFunction = filter[currentFilter];
     const filteredMovies = filterFunction(movies);
+    // показывем кнопку если количество фильмов больше уже показанных отфильтрованых фильмов
     this.#isShowButton = this.#counterMovies < filteredMovies.length;
     const sortedMovies = filteredMovies;
+    // применяем сортировку фильмов
     if (this.#sortType !== SortType.DEFAULT) {
       sortedMovies.sort(sorter[this.#sortType]);
     }
@@ -58,14 +64,18 @@ export default class BoardPresenter {
       case EventType.INIT:
         this.#clearBoard();
         this.#renderBoard();
+        this.#renderFilmAmount();
         break;
+      // при изменении каточки фильма
       case EventType.PATCH:
         this.#filmPresenters.get(movie.id).init(movie);
         break;
+      // при изменении порядка фильмов при фильтрации
       case EventType.MINOR:
-        this.#clearBoard();
+        this.#clearBoard({ resetCounterMovies: false });
         this.#renderBoard();
         break;
+      // при изменении порядка при фильтрации и сбросе фильтрации
       case EventType.MAJOR:
         this.#clearBoard({ resetSort: true });
         this.#renderBoard();
@@ -82,7 +92,7 @@ export default class BoardPresenter {
     }
   };
 
-  // метод очистки списка фильмов, resetSort - для сброса фильтров
+  // метод очистки  пршлого списка фильмов, для дальнейшей перерисовки. resetSort - для сброса фильтров
   //FIXME: исправить очистку кнопки после добавления в избранное
   #clearBoard({ resetSort = false, resetCounterMovies = true } = {}) {
     this.#filmPresenters.forEach((moviePresenter) => moviePresenter.clearMovie());
@@ -106,7 +116,7 @@ export default class BoardPresenter {
 
   }
 
-  // функция для отрисовки списка фильмов
+  // для отрисовки списка фильмов
   #renderMovies() {
     this.movies.forEach((movie) => {
       const filmPresenter = new FilmPresenter({ filmContainer: this.#moviesContainer.filmContainer, handleClickButton: this.#onDataChange });
@@ -116,6 +126,7 @@ export default class BoardPresenter {
     });
   }
 
+  // для отрисовки сортировки и передача handlesortMovies
   #renderSort() {
     this.#sortComponent = new SortView({
       onClickSorter: this.#handleSortMovies,
@@ -124,6 +135,7 @@ export default class BoardPresenter {
     render(this.#sortComponent, this.#moviesContainer.element, RenderPosition.BEFOREBEGIN);
   }
 
+  // условия для отрисовки сортировки,фильмов, кнопки и пустого листа
   #renderBoard() {
     if (this.movies.length > 0) {
       this.#renderSort();
@@ -136,17 +148,20 @@ export default class BoardPresenter {
     }
   }
 
+  // для функционирования сортировки
   #handleSortMovies = (sortType) => {
     this.#sortType = sortType;
     this.#clearBoard();
     this.#renderBoard();
   };
 
+  // отрисовка пустого листа
   #renderEmptyList() {
     this.#emptyListComponent = new EmptyListView();
     render(this.#emptyListComponent, this.#mainContainer);
   }
 
+  // отрисовка кнопки
   #renderButton() {
     this.#buttonComponent = new ButtonView({
       onClick: this.#handleShowMoreButton,
@@ -154,10 +169,17 @@ export default class BoardPresenter {
     render(this.#buttonComponent, this.#moviesContainer.filmContainer, RenderPosition.AFTEREND);
   }
 
+  // метод для функционирования кпоки 'Show more'
   #handleShowMoreButton = () => {
     this.#counterMovies += 5;
     this.#clearBoard({ resetCounterMovies: false });
     this.#renderBoard();
   };
 
+  #renderFilmAmount() {
+    this.#filmAmountComponent = new FilmAmount({
+      movieAmount: this.#filmModel.movies.length,
+    });
+    render(this.#filmAmountComponent, this.#footerContainer);
+  }
 }
