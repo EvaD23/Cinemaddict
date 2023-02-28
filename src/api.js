@@ -32,14 +32,14 @@ export default class Api extends ApiService {
       url: `comments/${filmId}`,
       method: Method.POST,
       body: JSON.stringify(comment),
-      // если мы отправляем JSON, нужно прописать Headers, чтобы сервер понял что делать с телеом
+      // если мы отправляем JSON, нужно прописать Headers, чтобы сервер понял что делать с телом
       headers: new Headers({ 'Content-Type': 'aplication/json' }),
     }).then(ApiService.parseResponse);
   }
 
-  deletePoint(comment) {
+  deleteComment(commentId) {
     return this._load({
-      url: `comments/${comment.id}`,
+      url: `comments/${commentId}`,
       method: Method.DELETE,
     });
   }

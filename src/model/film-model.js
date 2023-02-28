@@ -6,9 +6,10 @@ export default class FilmModel extends Observable {
   #api = null;
   #movies = new Map();
 
-  constructor(api) {
+  constructor(api, commentModel) {
     super();
     this.#api = api;
+    commentModel.addObserver(this.#handleChangeComments);
   }
 
   // получаем данные от сервера
@@ -30,6 +31,10 @@ export default class FilmModel extends Observable {
       movies.push(movie);
     });
     return movies;
+  }
+
+  getMovieById(id) {
+    return this.#movies.get(id);
   }
 
   //Добавляет обновление данных в модели делает отправку на сервер
@@ -124,5 +129,12 @@ export default class FilmModel extends Observable {
 
     return adaptedMovie;
   }
+
+  #handleChangeComments = (eventType, { movieId, commentId }) => {
+    const movie = this.#movies.get(movieId);
+    movie.comments = movie.comments.filter((comment) => comment !== commentId);
+    this.#movies.set(movieId, movie);
+    this._notify(eventType, movie);
+  };
 
 }

@@ -5,16 +5,18 @@ export default class FilmPresenter {
   #filmComponent = null;
   #filmContainer = null;
   #handleClickButton = null;
+  #handleClickCard = null;
 
 
-  constructor({ filmContainer, handleClickButton }) {
+  constructor({ filmContainer, handleClickButton, handleClickCard }) {
     this.#filmContainer = filmContainer;
     this.#handleClickButton = handleClickButton;
+    this.#handleClickCard = handleClickCard;
   }
 
   init(movie) {
     const prevMovieComponent = this.#filmComponent;
-    this.#filmComponent = new FilmView({ movie, handleClickButton: this.#handleClickButton });
+    this.#filmComponent = new FilmView({ movie, handleClickButton: this.#handleClickButton, handleClickCard: this.#handleClickCard });
     // для перерисовки карточки фильма с прошлой на новую или инциализация, если рендерится впервые
     if (!prevMovieComponent) {
       render(this.#filmComponent, this.#filmContainer);

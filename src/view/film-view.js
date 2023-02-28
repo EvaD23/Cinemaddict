@@ -1,72 +1,6 @@
 import { ActionType, EventType } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
-/*
-{
-  "id": "16",
-  "comments": [
-      "55798",
-      "55799",
-      "55800",
-      "55801",
-      "55802",
-      "55803"
-  ],
-  "info": {
-      "title": "Friends On The Storm",
-      "poster": "images/posters/the-man-with-the-golden-arm.jpg",
-      "director": "James Cameron",
-      "writers": [
-          "Robert Zemeckis",
-          "Brad Bird",
-          "Quentin Tarantino",
-          "Takeshi Kitano"
-      ],
-      "actors": [
-          "Morgan Freeman ",
-          "Matt Damon",
-          "Tom Hanks",
-          "Edward Norton",
-          "Robert De Niro",
-          "Takeshi Kitano",
-          "Brad Pitt",
-          "Ralph Fiennes"
-      ],
-      "release": {
-          "date": "2001-03-12T06:33:27.628Z",
-          "releaseCountry": "China"
-      },
-      "duration": 158,
-      "genre": [
-          "Horror",
-          "Family",
-          "Action",
-          "Comedy",
-          "Sci-Fi"
-      ],
-      "description": "true masterpiece where love and death are closer to heroes than their family.",
-      "alternativeTitle": "Guest Without The Wall",
-      "totalRating": 6.2,
-      "ageRating": 0
-  },
-  "userDetails": {
-      "watchlist": false,
-      "favorite": false,
-      "watchingDate": "2023-02-02T16:32:41.100Z",
-      "alreadyWatched": true
-  }
-}
-*/
-
-// функция добавляет форматирование для продолжительности фильма
-function createDurationTemplate(minutes) {
-  if (minutes < 60) {
-    return `${minutes}M`;
-  } else {
-    const hours = Math.floor(minutes / 60);
-
-    return `${hours}H ${minutes % 60}M`;
-  }
-}
+import { createDurationTemplate } from '../utils.js';
 
 function createDescriptionTempate(description) {
   if (description.length >= 140) {
@@ -75,7 +9,6 @@ function createDescriptionTempate(description) {
   return description;
 }
 
-// TODO: добавить работу с кнопками
 function createFilmTempate(movie) {
   return `   
 <article class="film-card">
@@ -102,14 +35,17 @@ function createFilmTempate(movie) {
 export default class FilmView extends AbstractView {
   #movie = null;
   #handleClickButton = null;
+  #handleClickCard = null;
 
-  constructor({ movie, handleClickButton }) {
+  constructor({ movie, handleClickButton, handleClickCard }) {
     super();
     this.#movie = movie;
     this.#handleClickButton = handleClickButton;
+    this.#handleClickCard = handleClickCard;
     this.element.querySelectorAll('.film-card__controls-item').forEach((element) => {
       element.addEventListener('click', this.#handlerClickButton);
     });
+    this.element.querySelector('.film-card__link').addEventListener('click', this.#handlerClickCard);
   }
 
   get template() {
@@ -134,5 +70,9 @@ export default class FilmView extends AbstractView {
     this.#handleClickButton(ActionType.UPDATE_MOVIE, EventType.MINOR, newMovie);
   };
 
+  #handlerClickCard = (evt) => {
+    evt.preventDefault();
+    this.#handleClickCard();
+  };
 
 }

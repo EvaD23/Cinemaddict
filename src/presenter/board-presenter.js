@@ -6,6 +6,8 @@ import SortView from '../view/sort-view.js';
 import EmptyListView from '../view/empty-list-view.js';
 import ButtonView from '../view/button-view.js';
 import FilmAmount from '../view/film-amount-view.js';
+import RatingContainer from '../view/rating-container.js';
+import PopupPresenter from './popup-presenter.js';
 
 
 export default class BoardPresenter {
@@ -21,14 +23,20 @@ export default class BoardPresenter {
   #isShowButton = true;
   #filmAmountComponent = null;
   #footerContainer = null;
+  #ratingBlockComponent = null;
+  #commentedBlockComponent = null;
+  #popupPresenter = null;
+  #commentModel = null;
   // Сохранять презентеры в мапу, чтобы получать к ним быстрй доступы
   #filmPresenters = new Map();
 
-  constructor({ mainContainer, filmModel, filterModel, footerContainer }) {
+  constructor({ mainContainer, filmModel, filterModel, footerContainer, commentModel }) {
     this.#mainContainer = mainContainer;
     this.#footerContainer = footerContainer;
     this.#filmModel = filmModel;
     this.#filterModel = filterModel;
+    this.#commentModel = commentModel;
+    this.#popupPresenter = new PopupPresenter({ handleClickButton: this.#onDataChange});
 
     // отрисовываем контейнер для фильма
     render(this.#moviesContainer, mainContainer);
@@ -65,6 +73,8 @@ export default class BoardPresenter {
         this.#clearBoard();
         this.#renderBoard();
         this.#renderFilmAmount();
+        this.#renderRatingBlock();
+        this.#renderTopCommentedBlock();
         break;
       // при изменении каточки фильма
       case EventType.PATCH:
@@ -89,11 +99,13 @@ export default class BoardPresenter {
       case ActionType.UPDATE_MOVIE:
         this.#filmModel.updateMovie(update, updateType);
         break;
+      case ActionType.DELETE_COMMENTS:
+        this.#commentModel.deleteComment(update);
+        break;
     }
   };
 
   // метод очистки  пршлого списка фильмов, для дальнейшей перерисовки. resetSort - для сброса фильтров
-  //FIXME: исправить очистку кнопки после добавления в избранное
   #clearBoard({ resetSort = false, resetCounterMovies = true } = {}) {
     this.#filmPresenters.forEach((moviePresenter) => moviePresenter.clearMovie());
     this.#filmPresenters.clear();
@@ -119,7 +131,17 @@ export default class BoardPresenter {
   // для отрисовки списка фильмов
   #renderMovies() {
     this.movies.forEach((movie) => {
-      const filmPresenter = new FilmPresenter({ filmContainer: this.#moviesContainer.filmContainer, handleClickButton: this.#onDataChange });
+      // делаем замыкание и handleClickCard инициализируем popupPresenter, в каждый FilmPresenter будет сохраен свой фильм через инициализацию popupPresenter
+      const filmPresenter = new FilmPresenter({
+        filmContainer: this.#moviesContainer.filmContainer, handleClickButton: this.#onDataChange,
+        handleClickCard: () => {
+          this.#popupPresenter.init(movie);
+          this.#commentModel.getCommentsByMovieId(movie.id)
+            .then((comments) => {
+              this.#popupPresenter.addComments(comments);
+            });
+        }
+      });
       // методы можно вызвать только у экземпляра. movie.id - чтобы легко можно было вытащить из мапы по ключу
       this.#filmPresenters.set(movie.id, filmPresenter);
       filmPresenter.init(movie);
@@ -140,11 +162,23 @@ export default class BoardPresenter {
     if (this.movies.length > 0) {
       this.#renderSort();
       this.#renderMovies();
+      this.#renderPopup();
       if (this.#isShowButton) {
         this.#renderButton();
       }
     } else {
       this.#renderEmptyList();
+    }
+  }
+
+  #renderPopup() {
+    if (this.#popupPresenter.isPopupOpen) {
+      const movie = this.#filmModel.getMovieById(this.#popupPresenter.movieId);
+      this.#popupPresenter.changeButtons(movie);
+      
+      this.#commentModel.getCommentsByMovieId(movie.id).then((comments) => {
+        this.#popupPresenter.addComments(comments);
+      });
     }
   }
 
@@ -182,4 +216,31 @@ export default class BoardPresenter {
     });
     render(this.#filmAmountComponent, this.#footerContainer);
   }
+
+  #renderRatingBlock() {
+    this.#ratingBlockComponent = new RatingContainer({ title: 'Top rated movies' });
+    render(this.#ratingBlockComponent, this.#moviesContainer.element);
+    const ratingMovies = this.#filmModel.movies.sort(sorter[SortType.RATING])
+      .slice(0, 2);
+    // добавляем презенторы для фильмов во вкладке Top rating
+    ratingMovies.forEach((movie) => {
+      const moviePresenter = new FilmPresenter({ filmContainer: this.#ratingBlockComponent.container, handleClickButton: this.#onDataChange });
+      moviePresenter.init(movie);
+    });
+  }
+
+  //TODO: Доделать случай обновления фильмов в блоке при добавления новых коментариев к фильму в попап
+  #renderTopCommentedBlock() {
+    this.#commentedBlockComponent = new RatingContainer({ title: 'Most commented' });
+    render(this.#commentedBlockComponent, this.#moviesContainer.element);
+    const commentedMovies = this.#filmModel.movies.sort(sorter[SortType.COMMENTED])
+      .slice(0, 2);
+    // добавляем презенторы для фильмов во вкладке Top rating
+    commentedMovies.forEach((movie) => {
+      const moviePresenter = new FilmPresenter({ filmContainer: this.#commentedBlockComponent.container, handleClickButton: this.#onDataChange });
+      moviePresenter.init(movie);
+    });
+  }
+
+
 }
