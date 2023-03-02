@@ -33,6 +33,7 @@ const FilterType = {
 const ActionType = {
   UPDATE_MOVIE: 'UPDATE_MOVIE',
   DELETE_COMMENTS: 'DELETE_COMMENTS',
+  CREATE_COMMENTS: 'CREATE_COMMENTS',
 };
 
 // // function filter(arr, pred) {

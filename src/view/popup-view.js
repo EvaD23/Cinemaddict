@@ -2,6 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
 import { createDurationTemplate } from '../utils.js';
 import { ActionType, EventType } from '../const.js';
+
 /*
 {
   "id": "16",
@@ -203,17 +204,32 @@ function createPopupTemplate(movie) {
 
 export default class PopupView extends AbstractView {
   #movie = null;
-  #handleClickButton = null;
-  #handleDeleteComment = null;
+  #handleDataChange = null;
+  #handleCloseButton = null;
+  #newComment = {};
 
-  constructor({ movie, handleClickButton }) {
+
+  constructor({ movie, handleClickButton, handleCloseButton }) {
     super();
     this.#movie = movie;
-    this.#handleClickButton = handleClickButton;
+    this.#handleDataChange = handleClickButton;
+    this.#handleCloseButton = handleCloseButton;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#handlerCloseButton);
     this.element.querySelectorAll('.film-card__controls-item').forEach((element) => {
       element.addEventListener('click', this.#handlerClickButton);
     });
-
+    this.element.querySelectorAll('.film-details__emoji-item').forEach((element) => {
+      element.addEventListener('change', this.#handlerChooseEmoji);
+    });
+    const commentTextArea = this.element.querySelector('.film-details__comment-input');
+    commentTextArea.addEventListener('change', (evt) => {
+      this.#newComment.comment = evt.target.value;
+    });
+    commentTextArea.addEventListener('keydown', (evt) => {
+      if (evt.metaKey && evt.key === 'Enter') {
+        this.#sendComment();
+      }
+    });
   }
 
   get template() {
@@ -269,13 +285,29 @@ export default class PopupView extends AbstractView {
         break;
     }
     // вызов функции обработчика действия вьюхи
-    this.#handleClickButton(ActionType.UPDATE_MOVIE, EventType.MINOR, newMovie);
+    this.#handleDataChange(ActionType.UPDATE_MOVIE, EventType.MINOR, newMovie);
   };
 
   #handlerDeleteComment = (evt) => {
-    this.#handleClickButton(ActionType.DELETE_COMMENTS,
+    this.#handleDataChange(ActionType.DELETE_COMMENTS,
       EventType.MINOR,
       { movieId: this.#movie.id, commentId: evt.target.dataset.id });
   };
 
+
+  #handlerCloseButton = () => {
+    this.#handleCloseButton();
+  };
+
+  #handlerChooseEmoji = (evt) => {
+    const emoji = evt.target.value;
+    this.#newComment.emotion = emoji;
+    this.element.querySelector('.film-details__add-emoji-label').innerHTML = `<img src="./images/emoji/${emoji}.png" width="55" height="55" alt="emoji"></img>`;
+  };
+
+  #sendComment = () => {
+    this.#handleDataChange(ActionType.CREATE_COMMENTS, EventType.MINOR,
+      { movieId: this.#movie.id, comment: this.#newComment }
+    );
+  };
 }

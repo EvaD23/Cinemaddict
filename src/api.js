@@ -33,7 +33,7 @@ export default class Api extends ApiService {
       method: Method.POST,
       body: JSON.stringify(comment),
       // если мы отправляем JSON, нужно прописать Headers, чтобы сервер понял что делать с телом
-      headers: new Headers({ 'Content-Type': 'aplication/json' }),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     }).then(ApiService.parseResponse);
   }
 

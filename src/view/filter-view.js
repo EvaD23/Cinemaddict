@@ -41,7 +41,6 @@ export default class FilterView extends AbstractView {
       this.#handleClickFilter(filterType, EventType.MAJOR);
     }
   };
-
 }
 
 

@@ -16,6 +16,7 @@ export default class PopupPresenter {
     const prevPopupComponent = this.#popupComponent;
     this.#popupComponent = new PopupView({
       movie, handleClickButton: this.#handleClickButton,
+      handleCloseButton: this.#handleCloseButton,
     });
     this.#movie = movie;
     if (prevPopupComponent) {
@@ -46,5 +47,9 @@ export default class PopupPresenter {
     this.#popupComponent.addComments(commments);
   }
 
-
+  #handleCloseButton = () => {
+    remove(this.#popupComponent);
+    this.#popupComponent = null;
+    this.#isPopupOpen = false;
+  };
 }

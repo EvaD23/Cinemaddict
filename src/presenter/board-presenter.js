@@ -27,6 +27,7 @@ export default class BoardPresenter {
   #commentedBlockComponent = null;
   #popupPresenter = null;
   #commentModel = null;
+  #filmPresentersMostCommented = [];
   // Сохранять презентеры в мапу, чтобы получать к ним быстрй доступы
   #filmPresenters = new Map();
 
@@ -36,7 +37,7 @@ export default class BoardPresenter {
     this.#filmModel = filmModel;
     this.#filterModel = filterModel;
     this.#commentModel = commentModel;
-    this.#popupPresenter = new PopupPresenter({ handleClickButton: this.#onDataChange});
+    this.#popupPresenter = new PopupPresenter({ handleClickButton: this.#onDataChange });
 
     // отрисовываем контейнер для фильма
     render(this.#moviesContainer, mainContainer);
@@ -74,7 +75,6 @@ export default class BoardPresenter {
         this.#renderBoard();
         this.#renderFilmAmount();
         this.#renderRatingBlock();
-        this.#renderTopCommentedBlock();
         break;
       // при изменении каточки фильма
       case EventType.PATCH:
@@ -102,6 +102,8 @@ export default class BoardPresenter {
       case ActionType.DELETE_COMMENTS:
         this.#commentModel.deleteComment(update);
         break;
+      case ActionType.CREATE_COMMENTS:
+        this.#commentModel.addComment(update.movieId, update.comment);
     }
   };
 
@@ -124,6 +126,15 @@ export default class BoardPresenter {
     // сбрасывает счетчик при изменении фильтра или сортировки
     if (resetCounterMovies) {
       this.#counterMovies = 5;
+    }
+    if (this.#commentedBlockComponent) {
+      remove(this.#commentedBlockComponent);
+    }
+    if (this.#filmPresentersMostCommented) {
+      this.#filmPresentersMostCommented.forEach((presenter) => {
+        presenter.clearMovie();
+      });
+      this.#filmPresentersMostCommented = [];
     }
 
   }
@@ -163,6 +174,7 @@ export default class BoardPresenter {
       this.#renderSort();
       this.#renderMovies();
       this.#renderPopup();
+      this.#renderTopCommentedBlock();
       if (this.#isShowButton) {
         this.#renderButton();
       }
@@ -175,7 +187,7 @@ export default class BoardPresenter {
     if (this.#popupPresenter.isPopupOpen) {
       const movie = this.#filmModel.getMovieById(this.#popupPresenter.movieId);
       this.#popupPresenter.changeButtons(movie);
-      
+
       this.#commentModel.getCommentsByMovieId(movie.id).then((comments) => {
         this.#popupPresenter.addComments(comments);
       });
@@ -229,7 +241,6 @@ export default class BoardPresenter {
     });
   }
 
-  //TODO: Доделать случай обновления фильмов в блоке при добавления новых коментариев к фильму в попап
   #renderTopCommentedBlock() {
     this.#commentedBlockComponent = new RatingContainer({ title: 'Most commented' });
     render(this.#commentedBlockComponent, this.#moviesContainer.element);
@@ -239,8 +250,7 @@ export default class BoardPresenter {
     commentedMovies.forEach((movie) => {
       const moviePresenter = new FilmPresenter({ filmContainer: this.#commentedBlockComponent.container, handleClickButton: this.#onDataChange });
       moviePresenter.init(movie);
+      this.#filmPresentersMostCommented.push(moviePresenter);
     });
   }
-
-
 }

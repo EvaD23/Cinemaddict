@@ -79,6 +79,5 @@ export default class FilterPresenter {
     });
     return moviesCount;
   }
-
 }
 

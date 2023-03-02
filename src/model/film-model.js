@@ -1,6 +1,6 @@
+/* eslint-disable no-case-declarations */
 import Observable from '../framework/observable.js';
 import { EventType } from '../const.js';
-
 
 export default class FilmModel extends Observable {
   #api = null;
@@ -39,17 +39,10 @@ export default class FilmModel extends Observable {
 
   //Добавляет обновление данных в модели делает отправку на сервер
   async updateMovie(movie, eventType) {
-    try {
-      const serverMovie = await this.#api.updateMovie(this.#parseClientToServer(movie));
-      const newMovie = this.#parseServerToClient(serverMovie);
-      this.#movies.set(newMovie.id, newMovie);
-      this._notify(eventType, newMovie);
-
-
-    }
-    catch (err) {
-      console.log(err); //TODO: добавить обработку ошибок
-    }
+    const serverMovie = await this.#api.updateMovie(this.#parseClientToServer(movie));
+    const newMovie = this.#parseServerToClient(serverMovie);
+    this.#movies.set(newMovie.id, newMovie);
+    this._notify(eventType, newMovie);
   }
 
   // Метод преобразует ключи в объекте для передачи с клиента на сервер
@@ -130,11 +123,21 @@ export default class FilmModel extends Observable {
     return adaptedMovie;
   }
 
-  #handleChangeComments = (eventType, { movieId, commentId }) => {
-    const movie = this.#movies.get(movieId);
-    movie.comments = movie.comments.filter((comment) => comment !== commentId);
-    this.#movies.set(movieId, movie);
-    this._notify(eventType, movie);
+  #handleChangeComments = (eventType, payLoad) => {
+    let movie;
+    switch (eventType) {
+      case EventType.MINOR:
+        const { movieId, commentId } = payLoad;
+        movie = this.#movies.get(movieId);
+        movie.comments = movie.comments.filter((comment) => comment !== commentId);
+        this.#movies.set(movieId, movie);
+        this._notify(eventType, movie);
+        break;
+      case EventType.MAJOR:
+        movie = this.#parseServerToClient(payLoad);
+        this.#movies.set(movie.id, movie);
+        this._notify(eventType, movie);
+        break;
+    }
   };
-
 }

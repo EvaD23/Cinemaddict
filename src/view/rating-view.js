@@ -29,6 +29,4 @@ export default class RatingView extends AbstractView {
   get template() {
     return createRatingView(this.#countAlreadyWacth);
   }
-
-
 }

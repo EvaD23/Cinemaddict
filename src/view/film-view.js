@@ -74,5 +74,4 @@ export default class FilmView extends AbstractView {
     evt.preventDefault();
     this.#handleClickCard();
   };
-
 }
